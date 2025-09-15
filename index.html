@@ -120,6 +120,97 @@
             margin-top: 20px;
         }
         
+        /* Адаптивные стили для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .config-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .licenses-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .license-card {
+                padding: 15px;
+            }
+            
+            .license-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .license-field {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .license-field strong {
+                min-width: auto;
+            }
+            
+            .button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+                padding: 20px;
+                max-height: 95vh;
+            }
+            
+            .input-group input,
+            textarea {
+                font-size: 16px; /* Предотвращает зум на iOS */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .config-section h3 {
+                font-size: 1.1em;
+            }
+            
+            .license-key {
+                font-size: 1em;
+                word-break: break-all;
+            }
+            
+            .close {
+                font-size: 24px;
+            }
+        }
+        
         .license-card {
             background: white;
             border: 1px solid #ddd;
