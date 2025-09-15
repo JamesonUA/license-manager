@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Онлайн менеджер лицензий</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #007bff;
+        }
+        
+        .config-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .button {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        
+        .button.success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .button.warning {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+        }
+        
+        .button.danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+        
+        .licenses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .license-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .license-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .license-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .license-key {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .license-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .license-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .license-status.blocked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .license-field {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .license-field strong {
+            color: #555;
+            min-width: 100px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.loading {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .input-group {
+            flex: 1;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Онлайн менеджер лицензий</h1>
+            <p>Управление лицензиями через GitHub API</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Настройки GitHub -->
+            <div class="config-section">
+                <h3>⚙️ Настройки GitHub</h3>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="github-token">🔑 GitHub Token (Personal Access Token):</label>
+                        <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="repo-owner">👤 Владелец репозитория:</label>
+                        <input type="text" id="repo-owner" placeholder="JamesonUA">
+                    </div>
+                    <div class="input-group">
+                        <label for="repo-name">📁 Название репозитория:</label>
+                        <input type="text" id="repo-name" placeholder="landdata-licenses">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="file-path">📄 Путь к файлу:</label>
+                    <input type="text" id="file-path" placeholder="licenses.json" value="licenses.json">
+                </div>
+                <button class="button" onclick="loadLicenses()">🔄 Загрузить лицензии</button>
+                <button class="button success" onclick="saveLicenses()">💾 Сохранить в GitHub</button>
+            </div>
+            
+            <!-- Управление лицензиями -->
+            <div class="config-section">
+                <h3>📋 Управление лицензиями</h3>
+                <button class="button success" onclick="showAddModal()">➕ Добавить лицензию</button>
+                <button class="button" onclick="loadLicenses()">🔄 Обновить список</button>
+            </div>
+            
+            <!-- Статус -->
+            <div id="status"></div>
+            
+            <!-- Список лицензий -->
+            <div id="licenses-container"></div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для добавления/редактирования -->
+    <div id="licenseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">➕ Добавить лицензию</h2>
+            
+            <div class="input-group">
+                <label for="license-key">🆔 Ключ лицензии:</label>
+                <input type="text" id="license-key" placeholder="Введите уникальный ключ">
+            </div>
+            
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="license-email">📧 Email:</label>
+                    <input type="email" id="license-email" placeholder="user@company.com">
+                </div>
+                <div class="input-group">
+                    <label for="license-label">🏷️ Название:</label>
+                    <input type="text" id="license-label" placeholder="Описание лицензии">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="license-owner">👤 Владелец:</label>
+                <input type="text" id="license-owner" placeholder="Имя владельца">
+            </div>
+            
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="license-expiry">⏰ Дата истечения:</label>
+                    <input type="date" id="license-expiry">
+                </div>
+                <div class="input-group">
+                    <label for="license-blocked">🔒 Заблокирована:</label>
+                    <select id="license-blocked">
+                        <option value="false">Нет</option>
+                        <option value="true">Да</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="license-bound-to">🔗 ID привязки (Hardware ID):</label>
+                <input type="text" id="license-bound-to" placeholder="Например: C41B1C87101FD568">
+                <small style="color: #666; font-size: 12px;">Оставьте пустым если лицензия не привязана к устройству</small>
+            </div>
+            
+            <div class="input-group">
+                <label for="license-notes">📝 Заметки:</label>
+                <textarea id="license-notes" placeholder="Дополнительная информация..."></textarea>
+            </div>
+            
+            <button class="button success" onclick="saveLicense()">💾 Сохранить</button>
+            <button class="button" onclick="closeModal()">❌ Отмена</button>
+        </div>
+    </div>
+
+    <script>
+        let licensesData = null;
+        let editingKey = null;
+        let fileSha = null;
+
+        function showStatus(message, type = 'loading') {
+            const statusDiv = document.getElementById('status');
+            const icon = type === 'loading' ? '<div class="loading"></div>' : 
+                        type === 'success' ? '✅ ' : '❌ ';
+            statusDiv.innerHTML = `<div class="status ${type}">${icon}${message}</div>`;
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        function getAuthHeaders() {
+            const token = document.getElementById('github-token').value;
+            return {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function getRepoInfo() {
+            return {
+                owner: document.getElementById('repo-owner').value,
+                repo: document.getElementById('repo-name').value,
+                path: document.getElementById('file-path').value
+            };
+        }
+
+        async function loadLicenses() {
+            const { owner, repo, path } = getRepoInfo();
+            
+            if (!owner || !repo || !path) {
+                showStatus('Заполните все поля настроек GitHub', 'error');
+                return;
+            }
+
+            showStatus('Загрузка лицензий из GitHub...');
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                fileSha = data.sha;
+                
+                // Правильная декодировка Unicode символов
+                const decodedContent = decodeURIComponent(escape(atob(data.content)));
+                const content = JSON.parse(decodedContent);
+                licensesData = content;
+                
+                showStatus('Лицензии успешно загружены!', 'success');
+                displayLicenses();
+                
+            } catch (error) {
+                showStatus(`Ошибка загрузки: ${error.message}`, 'error');
+                console.error('Error loading licenses:', error);
+            }
+        }
+
+        function displayLicenses() {
+            const container = document.getElementById('licenses-container');
+            
+            if (!licensesData || !licensesData.licenses) {
+                container.innerHTML = '<p>Лицензии не загружены</p>';
+                return;
+            }
+
+            const licenses = licensesData.licenses;
+            const keys = Object.keys(licenses);
+
+            if (keys.length === 0) {
+                container.innerHTML = '<p>Лицензии не найдены</p>';
+                return;
+            }
+
+            let html = '<div class="licenses-grid">';
+            
+            keys.forEach(key => {
+                const license = licenses[key];
+                const isBlocked = license.blocked;
+                const statusClass = isBlocked ? 'blocked' : 'active';
+                const statusText = isBlocked ? '🔴 ЗАБЛОКИРОВАНА' : '🟢 АКТИВНА';
+                
+                const expiry = license.expiry ? new Date(license.expiry).toLocaleDateString('ru-RU') : 'Не указана';
+                const created = license.created_at ? new Date(license.created_at).toLocaleDateString('ru-RU') : 'Не указана';
+
+                html += `
+                    <div class="license-card">
+                        <div class="license-header">
+                            <div class="license-key">${key}</div>
+                            <div class="license-status ${statusClass}">${statusText}</div>
+                        </div>
+                        <div class="license-field">
+                            <strong>📧 Email:</strong>
+                            <span>${license.email || 'Не указан'}</span>
+                        </div>
+                        <div class="license-field">
+                            <strong>🏷️ Название:</strong>
+                            <span>${license.label || 'Не указано'}</span>
+                        </div>
+                        <div class="license-field">
+                            <strong>👤 Владелец:</strong>
+                            <span>${license.owner || 'Не указан'}</span>
+                        </div>
+                        <div class="license-field">
+                            <strong>📅 Создана:</strong>
+                            <span>${created}</span>
+                        </div>
+                        <div class="license-field">
+                            <strong>⏰ Истекает:</strong>
+                            <span>${expiry}</span>
+                        </div>
+                        <div class="license-field">
+                            <strong>🔗 Привязана:</strong>
+                            <span>${license.bound_to || 'Не привязана'}</span>
+                        </div>
+                        ${license.bound_to ? `<div class="license-field">
+                            <strong>📅 Привязана:</strong>
+                            <span>${license.bound_at ? new Date(license.bound_at).toLocaleDateString('ru-RU') + ' ' + new Date(license.bound_at).toLocaleTimeString('ru-RU') : 'Не указано'}</span>
+                        </div>` : ''}
+                        <div class="license-field">
+                            <strong>📝 Заметки:</strong>
+                            <span>${license.notes || 'Нет заметок'}</span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="button" onclick="editLicense('${key}')">✏️ Редактировать</button>
+                            <button class="button danger" onclick="deleteLicense('${key}')">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function showAddModal() {
+            document.getElementById('modal-title').textContent = '➕ Добавить лицензию';
+            document.getElementById('license-key').disabled = false;
+            clearModalFields();
+            editingKey = null;
+            document.getElementById('licenseModal').style.display = 'block';
+        }
+
+        function editLicense(key) {
+            if (!licensesData || !licensesData.licenses[key]) return;
+            
+            const license = licensesData.licenses[key];
+            editingKey = key;
+            
+            document.getElementById('modal-title').textContent = '✏️ Редактировать лицензию';
+            document.getElementById('license-key').value = key;
+            document.getElementById('license-key').disabled = true;
+            document.getElementById('license-email').value = license.email || '';
+            document.getElementById('license-label').value = license.label || '';
+            document.getElementById('license-owner').value = license.owner || '';
+            document.getElementById('license-notes').value = license.notes || '';
+            document.getElementById('license-blocked').value = license.blocked ? 'true' : 'false';
+            document.getElementById('license-bound-to').value = license.bound_to || '';
+            
+            if (license.expiry) {
+                const date = new Date(license.expiry);
+                document.getElementById('license-expiry').value = date.toISOString().split('T')[0];
+            }
+            
+            document.getElementById('licenseModal').style.display = 'block';
+        }
+
+        function clearModalFields() {
+            document.getElementById('license-key').value = '';
+            document.getElementById('license-email').value = '';
+            document.getElementById('license-label').value = '';
+            document.getElementById('license-owner').value = '';
+            document.getElementById('license-notes').value = '';
+            document.getElementById('license-blocked').value = 'false';
+            document.getElementById('license-expiry').value = '';
+            document.getElementById('license-bound-to').value = '';
+        }
+
+        function closeModal() {
+            document.getElementById('licenseModal').style.display = 'none';
+            editingKey = null;
+        }
+
+        function saveLicense() {
+            const key = document.getElementById('license-key').value.trim();
+            const email = document.getElementById('license-email').value.trim();
+            const label = document.getElementById('license-label').value.trim();
+            const owner = document.getElementById('license-owner').value.trim();
+            const notes = document.getElementById('license-notes').value.trim();
+            const blocked = document.getElementById('license-blocked').value === 'true';
+            const expiryDate = document.getElementById('license-expiry').value;
+            const boundTo = document.getElementById('license-bound-to').value.trim();
+
+            if (!key) {
+                alert('Введите ключ лицензии!');
+                return;
+            }
+
+            if (!editingKey && licensesData.licenses[key]) {
+                alert('Лицензия с таким ключом уже существует!');
+                return;
+            }
+
+            const expiry = expiryDate ? new Date(expiryDate + 'T23:59:59Z').toISOString() : 
+                         new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+            const licenseData = {
+                email,
+                label,
+                owner,
+                created_at: editingKey ? licensesData.licenses[editingKey].created_at : new Date().toISOString(),
+                expiry,
+                blocked,
+                notes
+            };
+
+            // Обработка привязки
+            if (boundTo) {
+                licenseData.bound_to = boundTo;
+                // Если привязка новая или изменилась, обновляем дату привязки
+                if (!editingKey || !licensesData.licenses[editingKey].bound_to || licensesData.licenses[editingKey].bound_to !== boundTo) {
+                    licenseData.bound_at = new Date().toISOString();
+                } else {
+                    // Сохраняем старую дату привязки если ID не изменился
+                    licenseData.bound_at = licensesData.licenses[editingKey].bound_at;
+                }
+            }
+            // Если поле bound_to пустое, не добавляем эти поля в JSON
+
+            licensesData.licenses[key] = licenseData;
+            licensesData.last_updated = new Date().toISOString();
+
+            displayLicenses();
+            closeModal();
+            showStatus('Лицензия обновлена локально. Не забудьте сохранить в GitHub!', 'success');
+        }
+
+        function deleteLicense(key) {
+            if (!confirm(`Удалить лицензию "${key}"?`)) return;
+            
+            delete licensesData.licenses[key];
+            licensesData.last_updated = new Date().toISOString();
+            
+            displayLicenses();
+            showStatus('Лицензия удалена локально. Не забудьте сохранить в GitHub!', 'success');
+        }
+
+        async function saveLicenses() {
+            if (!licensesData) {
+                showStatus('Сначала загрузите лицензии', 'error');
+                return;
+            }
+
+            const { owner, repo, path } = getRepoInfo();
+            showStatus('Сохранение в GitHub...');
+
+            try {
+                // Правильная обработка Unicode символов
+                const jsonString = JSON.stringify(licensesData, null, 2);
+                const content = btoa(unescape(encodeURIComponent(jsonString)));
+                
+                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        message: `Update ${path}`,
+                        content: content,
+                        sha: fileSha
+                    })
+                });
+
+                if (response.status === 409) {
+                    // Конфликт версий - предлагаем перезагрузить
+                    showStatus('Файл был изменен на GitHub. Перезагружаем актуальную версию...', 'error');
+                    setTimeout(() => {
+                        loadLicenses();
+                        showStatus('Файл обновлен. Повторите изменения и сохраните снова.', 'error');
+                    }, 2000);
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                fileSha = data.content.sha;
+                
+                showStatus('Лицензии успешно сохранены в GitHub!', 'success');
+                
+            } catch (error) {
+                showStatus(`Ошибка сохранения: ${error.message}`, 'error');
+                console.error('Error saving licenses:', error);
+            }
+        }
+
+        // Загрузка настроек при загрузке страницы
+        window.onload = function() {
+            // Заполняем значения по умолчанию
+            document.getElementById('repo-owner').value = 'JamesonUA';
+            document.getElementById('repo-name').value = 'landdata-licenses';
+            document.getElementById('file-path').value = 'licenses.json';
+        }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('licenseModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
